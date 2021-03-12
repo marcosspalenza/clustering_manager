@@ -10,7 +10,7 @@ A basic GUI for local clustering task management. Using the [clustering optimiza
 
 ## Install
 
-Configure environment variables, install the clustering algoritm, generate the flask server, and set the linux service:
+Configure environment variables, install the clustering algorithm, generate the basic server, and set the linux service:
 
 ### APP.CONFIG
 
@@ -58,11 +58,11 @@ Initial parameters header configurations.
 
 Install the [clustering optimization](https://github.com/marcosspalenza/clustering_optimization) at the *control_clstropt.py* absolute path. Insert the file *control_clstropt.py* inside these path.
 
-## Server
+### Server
 
 Install Flask and Waitress. Configure *app.py* settings on *serve()* function at *app.py*.
 
-## Generate the linux service
+### Generate the linux service
 
 Create */etc/init/clstropt* and replace */path/to/* for *app.py* location:
 
@@ -80,13 +80,13 @@ start on filesystem
 exec python3 /path/to/app.py
 ```
 
-Control GUI activity using:
+Manage the GUI service activity using:
 
 `sudo service clstropt start`
 
 `sudo service clstropt stop`
 
-## Cron
+### Cron
 
 Set time **crontab** cycles to execute the manager. The process remove overlap in a built-in function using **ps** command.
 
