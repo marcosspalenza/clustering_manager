@@ -19,21 +19,27 @@ Initial parameters header configurations.
 - Create the input path and set the clustering input location.
 
 	Receives the user data and parameters:
+
 	File **app.py** : `app.config['UPLOAD_LOCATION'] = "/var/www/html/clustering/input/"`
+
 	File **control_clstropt.py** : `LOCATION_QUEUE = "/var/www/html/clustering/"`
 
 - Set queue location:
 
 	File **app.py** : `app.config['CTRL_LOCATION'] = "/var/www/html/clustering/"`
+
 	File **control_clstropt.py** : `LOCATION_QUEUE = "/var/www/html/clustering/""`
 
 - Create the input path and set the clustering output location. 
 	
 	Return the cluster information, including the cluster ids and report:
+
 	File **app.py** : `app.config['DOWNLOAD_LOCATION'] = "/var/www/html/clustering/output/"`
+
 	File **control_clstropt.py** : `"/var/www/html/clustering/output/"`
 
 	Set IP access on output public folder.
+
 	File **app.py** : `app.config['WEB_ENV'] = "http://"+HOST_IP+"/clustering/output/"`
 
 - Python prefix called for clustering:
@@ -59,24 +65,29 @@ Install Flask and Waitress. Configure *app.py* settings on *serve()* function at
 ## Generate the linux service
 
 Create */etc/init/clstropt* and replace */path/to/* for *app.py* location:
-`
+
+```
 # clstropt.conf
 start on filesystem
 exec python3 /path/to/app.py
-`
+```
 
 Create /etc/init.d/clstropt file
-`
+
+```
 # clstropt.conf
 start on filesystem
 exec python3 /path/to/app.py
-`
+```
 
 Control GUI activity using:
+
 `sudo service clstropt start`
+
 `sudo service clstropt stop`
 
 ## Cron
 
 Set time **crontab** cycles to execute the manager. The process remove overlap in a built-in function using **ps** command.
+
 `10 * * * * python3 /path/to/control_clstropt.py > /path/to/error.log`
