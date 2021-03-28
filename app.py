@@ -54,8 +54,11 @@ def check_status(dataset, user):
         with open(app.config['CTRL_LOCATION']+"ctrl_queue", "r") as lock_file:
             queue_info = [task for task in lock_file.read().split("\n") if task != ""]
 
-        if os.path.isdir(app.config['DOWNLOAD_LOCATION']+user+dataset):
-            if os.path.isfile(app.config['DOWNLOAD_LOCATION']+user+dataset+"/clusters.txt"):
+        cluster_file = app.config['DOWNLOAD_LOCATION']+user+dataset+"/clusters.txt"
+        exec_file = app.config['DOWNLOAD_LOCATION']+user+dataset+"/exec.csv"
+        output_path = app.config['DOWNLOAD_LOCATION']+user+dataset
+        if os.path.isdir(output_path):
+            if os.path.isfile(exec_file) and os.path.isfile(cluster_file):
                 return "success"
             else:
                 return "warning"
@@ -192,7 +195,7 @@ def dataset():
     return render_template("dataset.html", clusters=settings["clusters"], cluster_size=settings["cluster_size"],
                             cluster_path=settings["cluster_path"], cluster_exec=settings["cluster_exec"], time=settings["timer"], 
                             ss=settings["ss"], nmi=settings["nmi"], ari=settings["ari"], 
-                            ca=settings["ca"], dbs=settings["dbs"], chs=settings["chs"]
+                            sse=settings["sse"], ca=settings["ca"], dbs=settings["dbs"], chs=settings["chs"]
                         )
 
 def dataset_loc():
@@ -201,18 +204,41 @@ def dataset_loc():
         session["status"] = check_status(session["dataset"], session["usuario"])
         clsresults["clusters"] = get_clusters(session["dataset"], session["usuario"])
         clsresults["cluster_size"] = []
-        clsresults["cluster_path"] = app.config["WEB_ENV"]+session["usuario"]+session["dataset"]+"/clusters.txt"
-        clsresults["cluster_exec"] = app.config["WEB_ENV"]+session["usuario"]+session["dataset"]+"/exec.csv"
+        clsresults["cluster_exec"] = ""
+        clsresults["cluster_path"] = ""
         clsresults["timer"] = 0
         clsresults["ss"] = -1
+        clsresults["sse"] = -1
         clsresults["nmi"] = -1
         clsresults["ari"] = -1
         clsresults["ca"] = -1
         clsresults["dbs"] = -1
         clsresults["chs"] = -1
         if session["status"] == "success":
+            output = ""
+            with open(app.config["WEB_ENV"]+session["usuario"]+session["dataset"]+"/exec.csv", "r") as csvout:
+                output = [i for i in csvout.read().split("\n") if i != ""][-1]
+            """
+            Clustering Ouput 
+            0-"Dataset", 1-"Time(min)", 2-"Distance", 3-"Algorithm",
+            4-"Index", 5-"Optimizer", 6-"SS", 7-"DBS", 8-"CHS", 9-"SSE",
+            10-"NMI", 11-"ARI", 12-"CA", 13-"Tests", 14-"Clusters"
+            ]
+            """
+            clsresults["timer"] = output.split("\t")[1]
+            clsresults["ss"] = output.split("\t")[6]
+            clsresults["dbs"] = output.split("\t")[7]
+            clsresults["chs"] = output.split("\t")[8]
+            clsresults["sse"] = output.split("\t")[9]
+            clsresults["nmi"] = output.split("\t")[10]
+            clsresults["ari"] = output.split("\t")[11]
+            clsresults["ca"] = output.split("\t")[12]
+            clsresults["cluster_path"] = app.config["WEB_ENV"]+session["usuario"]+session["dataset"]+"/clusters.txt"
+            clsresults["cluster_exec"] = app.config["WEB_ENV"]+session["usuario"]+session["dataset"]+"/exec.csv"
             clsresults["clusters"] = " : ".join(sorted([str(len([c1 for c1 in clsresults["clusters"] if c1 == c2])) for c2 in [c for c in list(set(clsresults["clusters"]))]]))
             clsresults["cluster_size"] = len(clsresults["clusters"].split(":"))
+        elif session["status"] == "warning":
+            clsresults["cluster_path"] = app.config["WEB_ENV"]+session["usuario"]+session["dataset"]+"/exceptions.csv"
         return clsresults
     else:
         return render_template("index.html")

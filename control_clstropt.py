@@ -108,15 +108,14 @@ def clustering(psqueue):
     
 def main():
     ps_queue = read_queue(loc=LOCATION_QUEUE, filename="ctrl_queue")
-    try:    
-        while ps_queue != []:
+    while ps_queue != []:
+        try:
             ps_queue = read_queue(loc=LOCATION_QUEUE, filename="ctrl_queue")
             print("Clustering!")
-            clustering(ps_queue)
-    except Exception as e:
-        print(e)
-        print("Err! The task queue was stopped!")
-        sleep(600)    
+            ps_queue = clustering(ps_queue)
+        except Exception as e:
+            print("Err! Manager unable to execute the task")
+            print(e)
 
 if __name__ == "__main__":
     if not is_running():

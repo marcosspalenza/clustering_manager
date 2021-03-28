@@ -22,22 +22,45 @@
 			</div>
 		</div>
 		{% if session["status"] == "info" %}
-			<div class="alert alert-info" role="alert">
-				<h4 name="status">Status : Em espera </h4>
+		<div class="alert alert-info" role="alert">
+			<div class="row">
+				<div class="w-100">
+					<h4 name="status">Status : Em espera </h4>
+				</div>
 			</div>
+		</div>
 		{% elif session["status"] == "success" %}
-			<div class="alert alert-success" role="alert">
-				<h4 name="status">Status : Finalizado </h4>
-				<p>Time : {{ time }} </p>
+		<div class="alert alert-success" role="alert">
+			<div class="row">
+				<div class="w-75">
+					<h4 name="status">Status : Finalizado </h4>
+					<p>Time : {{ time }} </p>
+				</div>
+				<div class="w-25">
+					<a href="{{ cluster_path }}" target="_blank" class="btn btn-outline-success btn-lg">Download</a>
+					<a href="{{ cluster_exec }}" target="_blank" class="btn btn-outline-success btn-lg">Relatório</a>
+				</div>
 			</div>
+		</div>
 		{% elif session["status"] == "warning" %}
-			<div class="alert alert-warning" role="alert">
-				<h4 name="status">Status : Incompleto </h4>
+		<div class="alert alert-warning" role="alert">
+			<div class="row">
+				<div class="w-75">
+					<h4 name="status">Status : Incompleto </h4>
+				</div>
+				<div class="w-25">
+					<a href="{{ cluster_path }}" target="_blank" class="btn btn-outline-warning btn-lg">Erros</a>
+				</div>
 			</div>
+		</div>
 		{% else %}
-			<div class="alert alert-danger" role="alert">
-				<h4 name="status">Status : Indisponível </h4>
+		<div class="alert alert-danger" role="alert">
+			<div class="row">
+				<div class="w-100">
+					<h4 name="status">Status : Indisponível </h4>
+				</div>
 			</div>
+		</div>
 		{% endif %}
 		<br>
 		<h5>Parâmetros :</h5>
@@ -59,48 +82,44 @@
 		</table>
 		<br>
 		{% if session["status"] == "success" %}
-			<div class="row">
-				<div class="w-75">
-					<h4> k = {{ cluster_size }} </h4>
-					<hr>
-					<p> {{ clusters }} </p>		
-				</div>
-				<div class="w-25">
-					<a href="{{ cluster_path }}" class="btn btn-outline-dark btn-lg">Download</a>
-					<a href="{{ cluster_exec }}" class="btn btn-outline-dark btn-lg">Relatório</a>
-				</div>
+		<div class="row">
+			<div class="w-100">
+				<h4> k = {{ cluster_size }} </h4>
+				<hr>
+				<p> {{ clusters }} </p>		
 			</div>
-			<br>
-			<!--
-			<table class="table table-striped table-info">
-			<thead>
-				<th class="table-primary" colspan="2">Internal Validity Index</th>
-				<th class="table-primary border-left" colspan="2">External Validity Index</th>
-			</thead>
-			<tbody>
-				<tr class="table-active">
-					<td>Silhouette Score</td>
-					<td> {{ ss }} </td>
-					<td class="border-left">Normalized Mutual Information</td>
-					<td> {{ nmi }} </td>
-				</tr>
-
-				<tr class="table-active">
-					<td>Calinski-Harabasz Score</td>
-					<td> {{ chs }} </td>
-					<td class="border-left">Adjusted Rand Index</td>
-					<td> {{ ari }} </td>
-				</tr>
-
-				<tr class="table-active">
-					<td>Davies-Boldin Score</td>
-					<td> {{ dbs }} </td>
-					<td class="border-left">Clustering Accuracy</td>
-					<td> {{ ca }} </td>
-				</tr>		
-			</tbody>
-			</table>
-			-->
+		</div>
+		<table class="table table-striped">
+		<thead>
+			<th>Silhouette</th>
+			<th>Calinski-Harabasz</th>
+			<th>Davies-Boldin</th>
+			<th>S.S.E.</th>
+		</thead>
+		<tbody>
+			<tr>
+			<td> {{ session["ss"] }} </td>
+			<td> {{ session["chs"] }} </td>
+			<td> {{ session["dbs"] }} </td>
+			<td> {{ session["sse"] }} </td>
+			</tr>
+		</tbody>
+		</table>
+		<br>
+		<table class="table table-striped">
+		<thead>
+			<th>Norm. Mutual Information</th>
+			<th>Adj. Rand Index</th>
+			<th>Clustering Accuracy</th>
+		</thead>
+		<tbody>
+			<tr>
+			<td> {{ session["nmi"] }} </td>
+			<td> {{ session["ari"] }} </td>
+			<td> {{ session["ca"] }} </td>
+			</tr>
+		</tbody>
+		</table>
 		{% endif %}
 	</div>
 </body>
