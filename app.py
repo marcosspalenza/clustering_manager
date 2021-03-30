@@ -161,48 +161,63 @@ def search():
 
 @app.route("/search", methods = ["GET", "POST"])
 def select_search():
-    print()
     if request.form["database"] == None:
         return render_template('search.html')
     else:
-        dbloc = request.form["database"].lower()
-        print(dbloc)
-        if dbloc == None:
-            return render_template('search.html')   
+        try:
+            dbloc = request.form["database"].lower()
+            print(dbloc)
+            if dbloc == None:
+                return render_template('search.html')   
+            else:
+                parameters = read_params(app.config['UPLOAD_LOCATION'], dbloc)
+                session["pathout"] = dbloc
+                session["email"] = parameters["usuario"]
+                session["usuario"] = parameters["usuario"].lower().replace('.','').split('@')[0]
+                session["dataset"] = parameters["dataset"]
+                session["ext"] = parameters["extension"]
+                session["mod"] = parameters["model"]
+                session["algorithm"] = parameters["algorithm"]
+                session["metric"] = parameters["metric"]
+                session["optimizer"] = parameters["optimizer"]
+                session["ivi"] = parameters["index"]
+
+                session["pathout"] = app.config['DOWNLOAD_LOCATION']+session["usuario"]+session["dataset"]+"/"
+                session["status"] = check_status(session["dataset"], session["usuario"])
+        except Exception as e:
+            now = datetime.datetime.now()
+            current_time = now.strftime("%H:%M:%S")
+            with open(app.config['CTRL_LOCATION']+"/app-error.log", "w") as out:
+                out.write(str(current_time)+" : "+str(e)+" : "+str(session)+"\n")
         else:
-            parameters = read_params(app.config['UPLOAD_LOCATION'], dbloc)
-            session["pathout"] = dbloc
-            session["email"] = parameters["usuario"]
-            session["usuario"] = parameters["usuario"].lower().replace('.','').split('@')[0]
-            session["dataset"] = parameters["dataset"]
-            session["ext"] = parameters["extension"]
-            session["mod"] = parameters["model"]
-            session["algorithm"] = parameters["algorithm"]
-            session["metric"] = parameters["metric"]
-            session["optimizer"] = parameters["optimizer"]
-            session["ivi"] = parameters["index"]
+            return redirect(url_for('dataset'))
 
-            session["pathout"] = app.config['DOWNLOAD_LOCATION']+session["usuario"]+session["dataset"]+"/"
-            session["status"] = check_status(session["dataset"], session["usuario"])
-
-    return redirect(url_for('dataset'))
+    return redirect(url_for('index'))
 
 @app.route("/dataset")
 @app.route("/dataset", methods = ["GET", "POST"])
 def dataset():
-    print(session)
-    settings = dataset_loc()
-    return render_template("dataset.html", clusters=settings["clusters"], cluster_size=settings["cluster_size"],
-                            cluster_path=settings["cluster_path"], cluster_exec=settings["cluster_exec"], time=settings["timer"], 
-                            ss=settings["ss"], nmi=settings["nmi"], ari=settings["ari"], 
-                            sse=settings["sse"], ca=settings["ca"], dbs=settings["dbs"], chs=settings["chs"]
-                        )
+    try:
+        print(session)
+        settings = dataset_loc()
+        return render_template("dataset.html", clusters=settings["clusters"], cluster_size=settings["cluster_size"],
+                                cluster_path=settings["cluster_path"], cluster_exec=settings["cluster_exec"], time=settings["timer"], 
+                                ss=settings["ss"], nmi=settings["nmi"], ari=settings["ari"], 
+                                sse=settings["sse"], ca=settings["ca"], dbs=settings["dbs"], chs=settings["chs"]
+                            )
+    except Exception as e:
+        now = datetime.datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        with open(app.config['CTRL_LOCATION']+"/app-error.log", "w") as out:
+            out.write(str(current_time)+" : "+str(e)+" : "+str(session)+"\n")
+    else:
+        return redirect(url_for('dataset'))
 
 def dataset_loc():
     if session.get('dataset') is not None:
         clsresults = defaultdict()
         session["status"] = check_status(session["dataset"], session["usuario"])
-        clsresults["clusters"] = get_clusters(session["dataset"], session["usuario"])
+        clsresults["clusters"] = []
         clsresults["cluster_size"] = []
         clsresults["cluster_exec"] = ""
         clsresults["cluster_path"] = ""
@@ -216,8 +231,9 @@ def dataset_loc():
         clsresults["chs"] = -1
         if session["status"] == "success":
             output = ""
-            with open(app.config["WEB_ENV"]+session["usuario"]+session["dataset"]+"/exec.csv", "r") as csvout:
+            with open(app.config['DOWNLOAD_LOCATION']+session["usuario"]+session["dataset"]+"/exec.csv", "r") as csvout:
                 output = [i for i in csvout.read().split("\n") if i != ""][-1]
+            clsresults["clusters"] = get_clusters(session["dataset"], session["usuario"])
             """
             Clustering Ouput 
             0-"Dataset", 1-"Time(min)", 2-"Distance", 3-"Algorithm",
@@ -225,7 +241,7 @@ def dataset_loc():
             10-"NMI", 11-"ARI", 12-"CA", 13-"Tests", 14-"Clusters"
             ]
             """
-            clsresults["timer"] = output.split("\t")[1]
+            clsresults["timer"] = round(float(output.split("\t")[1]), 4)
             clsresults["ss"] = output.split("\t")[6]
             clsresults["dbs"] = output.split("\t")[7]
             clsresults["chs"] = output.split("\t")[8]

@@ -4,38 +4,62 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>Clustering</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
 	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 	<style type="text/css">
+		body {
+			background-color: #E6E6E6;
+		}
 		.form-check-label{
+			font-size: 90%;
 			padding-right: 1em;
+		}
+		#tb-distances{
+			font-size: 80%;
+		}
+		#tb-distances td{
+			background-color: #E6E6E6;	
+		}
+		#repo-link{
+			padding-top: 1em;
 		}
 	</style>
 </head>
 <body>
 	<div class="container">
-		<h1>Dataset Clustering</h1>
-		<form action="/" method="POST" enctype="multipart/form-data">
-			<h4> Usuário </h4>
-			<input class="form-control" name="email" placeholder="Digite o email do usuário." type="text" autocomplete="off" required/>
-			<br>
-			<h4> Dataset </h4>
-			<input class="form-control" name="file" placeholder="Selecione o dataset para envio." type="file" autocomplete="off" required/>
-			<div class="form-check form-check-inline" required>
-				<input class="form-check-input" type="radio" name="mod" id="radio-mod" value="sparse" checked>
-				<label class="form-check-label" for="radio-mod">Esparso (.mtx)</label>
-				<input class="form-check-input" type="radio" name="mod" id="radio-mod" value="dense">
-				<label class="form-check-label" for="radio-mod">Denso (.mat)</label>
+		<div class="row">
+			<div class="col-10">
+				<h1>Dataset Clustering Manager</h1>
 			</div>
-			<br>
-			<br>
+			<div id="repo-link" class="col-2">
+				<a class="btn btn-lg btn-outline-dark"  target="_blank" href="https://github.com/marcosspalenza/clustering_optimization"><i class="bi bi-github"></i> GitHub</a>
+			</div>
+		</div>
+		<form action="/" method="POST" enctype="multipart/form-data">
+			<div class="row">
+				<div class="col-sm">
+					<h4> Usuário </h4>
+					<input class="form-control" name="email" placeholder="Digite o email do usuário." type="text" autocomplete="off" required/>		
+				</div>
+				<div class="col-sm">
+					<h4> Dataset </h4>
+					<input class="form-control" name="file" placeholder="Selecione o dataset para envio." type="file" autocomplete="off" required/>
+					<div class="form-check form-check-inline" required>
+						<input class="form-check-input" type="radio" name="mod" id="radio-mod" value="sparse" checked>
+						<label class="form-check-label" for="radio-mod">Esparso (.mtx)</label>
+						<input class="form-check-input" type="radio" name="mod" id="radio-mod" value="dense">
+						<label class="form-check-label" for="radio-mod">Denso (.mat)</label>
+					</div>
+				</div>
+			</div>
 			<h4> Algoritmo </h4>
 			<div class="form-check form-check-inline" required>
 				<input class="form-check-input" type="radio" name="alg" id="radio-alg" value="agglomerative" checked>
 				<label class="form-check-label" for="radio-alg">Agglomerative</label>
 			</div>
-			<br>
+			<hr>
 			<h4> Otimizador </h4>
 			<div class="form-check form-check-inline" required>
 				<input class="form-check-input" type="radio" name="opt" id="radio-opt" value="gprocess" checked>
@@ -45,7 +69,7 @@
 				<input class="form-check-input" type="radio" name="opt" id="radio-opt" value="dummy">
 				<label class="form-check-label" for="radio-opt">Dummy (Random)</label>
 			</div>
-			<br>
+			<hr>
 			<h4> Índice </h4>
 			<div class="form-check form-check-inline" required>
 				<input class="form-check-input" type="radio" name="idx" id="radio-idx" value="silhouette" checked>
@@ -61,102 +85,84 @@
 				<input class="form-check-input" type="radio" name="idx" id="radio-idx" value="cv_size">
 				<label class="form-check-label" for="radio-idx">Coef. Var. Cluster Sizes</label>
 			</div>
-			<br>
+			<hr>
 			<h4> Métrica de Distância </h4>
 			<div class="form-check form-check-inline" required>
-				<table class="table table-striped">
+				<table id="tb-distances" class="table">
 				<tbody>
 				<tr class="table-light">
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="braycurtis">
-						<br>
-						<label class="form-check-label" for="radio-mtr">Braycurtis</label>    
+						<label class="form-check-label" for="radio-mtr">Bray-Curtis</label>    
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="canberra">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Canberra</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="chebyshev">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Chebyshev</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="correlation">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Correlation</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="cosine" checked>
-						<br>
 						<label class="form-check-label" for="radio-mtr">Cosine</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="dice">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Dice</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="euclidean">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Euclidean</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="hamming">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Hamming</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="jaccard">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Jaccard</label>
 					</td>
 				</tr>
 				<tr class="table-light">
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="kulsinski">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Kulsinski</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="mahalanobis">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Mahalanobis</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="manhattan">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Manhattan</label>    
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="matching">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Matching</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="minkowski">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Minkowski</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="rogerstanimoto">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Rogers-Tanimoto</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="russellrao">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Russell-Rao</label>    
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="sokalmichener">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Sokal-Michener</label>
 					</td>
 					<td>
 						<input class="form-check-input" type="radio" name="mtr" id="radio-mtr" value="sokalsneath">
-						<br>
 						<label class="form-check-label" for="radio-mtr">Sokal-Sneath</label>    
 					</td>
 				</tr>
@@ -170,3 +176,4 @@
 	</div>
 </body>
 </html>
+
