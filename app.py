@@ -1,29 +1,24 @@
 import os
-# import secrets # Python 3.6+
+import secrets
 import datetime
 from waitress import serve
 from collections import defaultdict
 from werkzeug.utils import secure_filename
 from flask import Flask, session, flash, render_template, request, url_for, redirect
 
+__ALLOWED_EXTENSIONS = {"mat", "mtx"}
+__HOST_IP = "0.0.0.0"
 
-app = Flask(__name__)
-
-ALLOWED_EXTENSIONS = {"mat", "mtx"}
-HOST_IP = "0.0.0.0"
-
+# app.run(debug=True)
 app = Flask(__name__)
 app.config['UPLOAD_LOCATION'] = "/var/www/html/clustering/input/"
 app.config['DOWNLOAD_LOCATION'] = "/var/www/html/clustering/output/"
 app.config['CTRL_LOCATION'] = "/var/www/html/clustering/"
-app.config['WEB_ENV'] = "http://"+HOST_IP+"/clustering/output/"
-# app.config["SECRET_KEY"] = secrets.token_urlsafe(16) # Add using Python 3.6+
-app.config["SECRET_KEY"] = os.urandom(32) # Using Python3.5
-app.permanent_session_lifetime = datetime.timedelta(days=120)
-
-
+app.config['WEB_ENV'] = "http://"+__HOST_IP+"/clustering/output/"
+app.config["SECRET_KEY"] = secrets.token_urlsafe(16) # Add using Python 3.6+
+    
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in __ALLOWED_EXTENSIONS
 
 def add_queue(dataset):
     try:
@@ -93,32 +88,19 @@ def upload_file():
             filename = secure_filename(f.filename)
             if f and allowed_file(filename):
                 session["email"] = request.form["email"].lower()
-
                 session["usuario"] = request.form["email"].lower().replace('.','').split('@')[0]
-
                 session["dataset"] = filename.rsplit('.', 1)[0].lower()
-
                 session["metric"] = request.form["mtr"].lower()
-
                 session["optimizer"] = request.form["opt"].lower()
-
                 session["algorithm"] = request.form["alg"].lower()
-
                 session["ivi"] = request.form["idx"].lower()
-                
                 session["ext"] = filename.rsplit('.', 1)[1].lower()
-
                 session["mod"] = request.form["mod"].lower()
-
                 location = session["usuario"]+session["dataset"]
-
                 session["pathin"] = app.config['UPLOAD_LOCATION']+session["usuario"]+session["dataset"]+"/"
                 session["pathout"] = app.config['DOWNLOAD_LOCATION']+session["usuario"]+session["dataset"]+"/"
-
-
                 if not os.path.isdir(session["pathin"]):
                     os.mkdir(session["pathin"])
-
                 '''
                 Fix dataset model and matrix shape divergence
                 '''
@@ -130,9 +112,7 @@ def upload_file():
                     f.save(os.path.join(session["pathin"], "data.mat"))
                 else:
                     f.save(os.path.join(session["pathin"], "data."+session["ext"]))
-
                 process_flag = add_queue(location)
-
                 if process_flag:
                     session["status"] = "info"
                     save_pssinfo(session)
@@ -154,10 +134,12 @@ def read_params(pathin, pss):
                 cfg[p.split("=")[0]] = p.split("=")[1]
     return cfg
 
+
 @app.route("/search")
 def search():
     dbf = [p for p in os.listdir(app.config['UPLOAD_LOCATION']) if os.path.isdir(app.config['UPLOAD_LOCATION']+p)]
     return render_template('search.html', dbfolders=dbf)
+
 
 @app.route("/search", methods = ["GET", "POST"])
 def select_search():
@@ -181,7 +163,6 @@ def select_search():
                 session["metric"] = parameters["metric"]
                 session["optimizer"] = parameters["optimizer"]
                 session["ivi"] = parameters["index"]
-
                 session["pathout"] = app.config['DOWNLOAD_LOCATION']+session["usuario"]+session["dataset"]+"/"
                 session["status"] = check_status(session["dataset"], session["usuario"])
         except Exception as e:
@@ -213,6 +194,7 @@ def dataset():
     else:
         return redirect(url_for('dataset'))
 
+
 def dataset_loc():
     if session.get('dataset') is not None:
         clsresults = defaultdict()
@@ -236,19 +218,19 @@ def dataset_loc():
             clsresults["clusters"] = get_clusters(session["dataset"], session["usuario"])
             """
             Clustering Ouput 
-            0-"Dataset", 1-"Time(min)", 2-"Distance", 3-"Algorithm",
-            4-"Index", 5-"Optimizer", 6-"SS", 7-"DBS", 8-"CHS", 9-"SSE",
-            10-"NMI", 11-"ARI", 12-"CA", 13-"Tests", 14-"Clusters"
-            ]
+            Dataset - 0 | Date - 1 | Time(min) - 2 | Distance - 3 | Algorithm - 4 | Index - 5 | Optimizer - 6 |
+            SS - 7 | DBS - 8 | CHS - 9 | SSE - 10 | CVS - 11 | NMI - 12 | ARI - 13 | CA - 14
+            Tests - 15 | Clusters - 16
             """
             clsresults["timer"] = round(float(output.split("\t")[1]), 4)
-            clsresults["ss"] = output.split("\t")[6]
-            clsresults["dbs"] = output.split("\t")[7]
-            clsresults["chs"] = output.split("\t")[8]
-            clsresults["sse"] = output.split("\t")[9]
-            clsresults["nmi"] = output.split("\t")[10]
-            clsresults["ari"] = output.split("\t")[11]
-            clsresults["ca"] = output.split("\t")[12]
+            clsresults["ss"] = output.split("\t")[7]
+            clsresults["dbs"] = output.split("\t")[8]
+            clsresults["chs"] = output.split("\t")[9]
+            clsresults["sse"] = output.split("\t")[10]
+            clsresults["cvs"] = output.split("\t")[11]
+            clsresults["nmi"] = output.split("\t")[12]
+            clsresults["ari"] = output.split("\t")[13]
+            clsresults["ca"] = output.split("\t")[14]
             clsresults["cluster_path"] = app.config["WEB_ENV"]+session["usuario"]+session["dataset"]+"/clusters.txt"
             clsresults["cluster_exec"] = app.config["WEB_ENV"]+session["usuario"]+session["dataset"]+"/exec.csv"
             clsresults["clusters"] = " : ".join(sorted([str(len([c1 for c1 in clsresults["clusters"] if c1 == c2])) for c2 in [c for c in list(set(clsresults["clusters"]))]]))
@@ -260,5 +242,6 @@ def dataset_loc():
         return render_template("index.html")
 
 if __name__ == "__main__":
-    # app.run(debug=True)
-    serve(app, host="0.0.0.0", port="8888")
+    # app.config["SECRET_KEY"] = os.urandom(32) # Using Python3.5
+    app.permanent_session_lifetime = datetime.timedelta(days=120)
+    serve(app, host=__HOST_IP, port="8888")

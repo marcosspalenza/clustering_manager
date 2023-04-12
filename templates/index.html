@@ -46,7 +46,7 @@
 				<div class="col-sm">
 					<h4> Dataset </h4>
 					<input class="form-control" name="file" placeholder="Selecione o dataset para envio." type="file" autocomplete="off" required/>
-					<div class="form-check form-check-inline" required>
+					<div class="form-check form-check-inline" title="Certifique-se que os arquivo seguem os padrões do modelo (via GitHub)" required>
 						<input class="form-check-input" type="radio" name="mod" id="radio-mod" value="sparse" checked>
 						<label class="form-check-label" for="radio-mod">Esparso (.mtx)</label>
 						<input class="form-check-input" type="radio" name="mod" id="radio-mod" value="dense">
@@ -65,9 +65,7 @@
 				<div class="col-6">
 					<h4> Otimizador </h4>
 					<select class="form-select form-select-sm" name="opt" required>
-						<option value="gprocess" selected>Gaussian Process</option>
-						<option value="dtree">Decision Trees </option>
-						<option value="dummy">Dummy (Random)</option>
+						<option value="default" selected>Default</option>
 					</select>
 				</div>
 			</div>

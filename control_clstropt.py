@@ -58,32 +58,23 @@ def run_clustering(pss, cfg):
     """
     if not os.path.isdir(LOCATION_OUT+pss+"/"):
         os.mkdir(LOCATION_OUT+pss+"/")
-
     if cfg == []:
         location_in = LOCATION_IN+pss+"/"
         location_out = LOCATION_OUT+pss+"/"
-
         dbname = [d for d in os.listdir(location_in) if ".mtx" in d or ".mat" in d][0]
-
         os.system(PYTHON_MODE+" "+CLSTR_APP+" -i "+location_in+" -o "+location_out+" "+dbname)
-
     else:
         dbfile = "data."+cfg["extension"]
         # dblbl = pss+".labels"
-
         folder = cfg["usuario"].replace('.','').split('@')[0]+cfg["dataset"]+"/"
-
         location_in = LOCATION_IN+folder
         location_out = LOCATION_OUT+folder
-
         if not os.path.isdir(LOCATION_OUT):
             os.mkdir(LOCATION_OUT)
-
         mtr = cfg["metric"]
         ivi = cfg["index"]
         alg = cfg["algorithm"]
         opt = cfg["optimizer"]
-
         model = cfg["model"]
         os.system(PYTHON_MODE+" "+CLSTR_APP+" -a "+alg+" -t "+opt+" -e "+ivi+" -f "+model+" -i "+location_in+" -o "+location_out+" -d "+mtr+" "+dbfile)
 
@@ -96,7 +87,6 @@ def read_params(pathin, pss):
         for p in parameters[1:]:
             if p != []:
                 cfg[p.split("=")[0]] = p.split("=")[1]
-
     return cfg
 
 def clustering(psqueue):
